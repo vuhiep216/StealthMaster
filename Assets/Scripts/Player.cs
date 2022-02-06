@@ -16,8 +16,6 @@ public class Player : MonoBehaviour
     private const float WalkSpeed = 9.99f;
     private const float AttackRange = 3.0f;
     private const float AttackTime = 0.7f;
-    
-
     private enum State
     {
         Idle,Walk,Run,Attack,Win,Die
@@ -29,6 +27,7 @@ public class Player : MonoBehaviour
     private State _state = State.Idle;
     private float _attackTime;
     private float _hp;
+    
     private void Start()
     {
         _enemies = FindObjectsOfType<Enemy>();
@@ -40,7 +39,8 @@ public class Player : MonoBehaviour
     {
         var move = dynamicJoystick.Direction * speed;
         agent.velocity = new Vector3(move.x, 0, move.y);
-
+        FindNearestEnemy();
+        
         if (_state != State.Die && Vector3.Distance(transform.position,_exit.transform.position)<1.0f)
         {
             ChangeState(State.Win);
@@ -152,4 +152,21 @@ public class Player : MonoBehaviour
         }
         return false;
     }
+
+    private void FindNearestEnemy()
+    {
+        float nearestDistance = Mathf.Infinity;
+        Enemy nearestEnemy;
+        foreach (var enemy in _enemies)
+        {
+            var distance = (enemy.transform.position - transform.position).sqrMagnitude;
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestEnemy = enemy;
+            }
+        }
+        transform.LookAt(nearestEnemy.transform.position);
+    }
+    
 }
