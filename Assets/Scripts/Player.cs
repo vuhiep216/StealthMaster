@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
     }
 
     private Enemy[] _enemies;
+    private Enemy _target;  
     private Exit _exit;
 
     private State _state = State.Idle;
@@ -39,7 +40,6 @@ public class Player : MonoBehaviour
     {
         var move = dynamicJoystick.Direction * speed;
         agent.velocity = new Vector3(move.x, 0, move.y);
-        FindNearestEnemy();
         
         if (_state != State.Die && Vector3.Distance(transform.position,_exit.transform.position)<1.0f)
         {
@@ -72,6 +72,10 @@ public class Player : MonoBehaviour
                 if (_attackTime <= 0)
                 {
                     ChangeState(State.Walk);
+                }
+                else
+                {
+                    FindNearestEnemy();
                 }
                 break;
             case State.Win:
@@ -146,6 +150,7 @@ public class Player : MonoBehaviour
         {
             if(Vector3.Distance( e.transform.position, transform.position) < AttackRange)
             {
+                _target = e;
                 ChangeState(State.Attack);
                 return true;
             }   
@@ -155,18 +160,10 @@ public class Player : MonoBehaviour
 
     private void FindNearestEnemy()
     {
-        float nearestDistance = Mathf.Infinity;
-        Enemy nearestEnemy;
-        foreach (var enemy in _enemies)
-        {
-            var distance = (enemy.transform.position - transform.position).sqrMagnitude;
-            if (distance < nearestDistance)
-            {
-                nearestDistance = distance;
-                nearestEnemy = enemy;
-            }
-        }
-        transform.LookAt(nearestEnemy.transform.position);
+        agent.velocity=Vector3.zero;
+        var distance = _target.transform.position - transform.position;
+        transform.forward = distance;
+        transform.position += distance.normalized * Time.smoothDeltaTime; //Hút nhân vật vào phía địch
     }
     
 }
